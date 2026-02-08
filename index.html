@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ricordi Eterni</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: "Times New Roman", Times, serif;
+      background: #0B3C91;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .box {
+      background: #FFFFFF;
+      padding: 25px;
+      border-radius: 14px;
+      max-width: 420px;
+      margin: 40px auto;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      color: #0B3C91;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #333;
+      font-size: 16px;
+      margin: 8px 0;
+    }
+
+    input[type="file"] {
+      margin-top: 15px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 14px;
+      width: 100%;
+      background: #0B3C91;
+      border: none;
+      color: #FFFFFF;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #mensaje {
+      margin-top: 15px;
+      color: #0B3C91;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h1>✨RICORDI ETERNI✨</h1>
+    <p>💍 X & D 💍</p>
+    <p><strong>Máximo 10 fotos por invitado</strong></p>
+
+    <input
+      type="file"
+      id="photos"
+      accept="image/*"
+      capture="environment"
+      multiple
+    >
+
+    <button onclick="validarFotos()">Captura el momento</button>
+    <p id="mensaje"></p>
+  </div>
+
+  <script>
+    function validarFotos() {
+      const input = document.getElementById("photos");
+      const mensaje = document.getElementById("mensaje");
+
+      if (!input || input.files.length === 0) {
+        alert("Selecciona al menos una foto");
+        return;
+      }
+
+      if (input.files.length > 10) {
+        alert("Máximo 10 fotos por invitado");
+        input.value = "";
+        return;
+      }
+
+      mensaje.textContent = "Subiendo fotos...";
+
+      const cloudName = "dopobu3ke";
+      const uploadPreset = "boda_publica";
+
+      Array.from(input.files).forEach(file => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
+
+        fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: "POST",
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.secure_url) {
+            mensaje.textContent = "Fotos subidas correctamente ✔️ ¡Gracias!";
+          } else {
+            mensaje.textContent = "Error al subir fotos ❌";
+          }
+        })
+        .catch(() => {
+          mensaje.textContent = "Error de conexión ❌";
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>
