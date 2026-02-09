@@ -46,6 +46,7 @@
       border-radius: 12px;
       font-size: 16px;
       cursor: pointer;
+      transition: background 0.3s;
     }
 
     button:hover {
@@ -74,6 +75,23 @@
       width: 100%;
       border-radius: 10px;
       border: 2px solid #C0C0C0;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    #album img:hover {
+      transform: scale(1.05);
+    }
+
+    .btn-album {
+      background: #f28c8c;
+      color: white;
+      border: none;
+      margin-top: 14px;
+    }
+
+    .btn-album:hover {
+      background: #d15d7a;
     }
   </style>
 </head>
@@ -89,23 +107,14 @@
 
     <button onclick="abrirCamara()">Captura el momento</button>
     <button onclick="abrirGaleria()">Sube tu recuerdo</button>
-    <button onclick="subirFotos()">Guarda tu recuerdo</button>
-    <!-- Botón para abrir el álbum -->
-<a href="album.html" class="btn" style="padding:10px 20px; background:#f28c8c; color:white; text-decoration:none; border-radius:5px;">
-  Ver álbum
-</a>
-
+    <button onclick="guardarRecuerdo()">Guarda tu recuerdo</button>
+    <button onclick="mostrarAlbum()" class="btn-album">Ver álbum</button>
 
     <p id="mensaje"></p>
     <div id="album"></div>
   </div>
 
   <script>
-    // 🔧 CONFIGURA TUS DATOS DE CLOUDINARY
-  const CLOUD_NAME = "dopobu3ke";
-const UPLOAD_PRESET = "boda14";
-
-
     let fotosSeleccionadas = [];
 
     function abrirCamara() {
@@ -125,56 +134,35 @@ const UPLOAD_PRESET = "boda14";
         fotosSeleccionadas.length + " foto(s) seleccionada(s)";
     }
 
-    async function subirFotos() {
+    function guardarRecuerdo() {
       if (fotosSeleccionadas.length === 0) {
         document.getElementById("mensaje").innerText = "No seleccionaste fotos";
         return;
       }
 
-      document.getElementById("mensaje").innerText = "Subiendo recuerdos...";
+      const album = document.getElementById("album");
+      fotosSeleccionadas.forEach(foto => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = document.createElement("img");
+          img.src = event.target.result;
+          album.appendChild(img);
+        }
+        reader.readAsDataURL(foto);
+      });
 
-      for (let foto of fotosSeleccionadas) {
-        const formData = new FormData();
-        formData.append("file", foto);
-        formData.append("upload_preset", UPLOAD_PRESET);
-
-        await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-          method: "POST",
-          body: formData
-        });
-      }
-
-      document.getElementById("mensaje").innerText =
-        "✨ Tu recuerdo fue guardado ✨";
-
+      document.getElementById("mensaje").innerText = "✨ Recuerdo guardado en el álbum ✨";
       fotosSeleccionadas = [];
     }
 
-    async function mostrarAlbum() {
+    function mostrarAlbum() {
       const album = document.getElementById("album");
-      album.style.display = "grid";
-      album.innerHTML = "Cargando álbum...";
-
-      const res = await fetch(
-        `https://res.cloudinary.com/${CLOUD_NAME}/image/list/boda.json`
-      );
-
-      const data = await res.json();
-      album.innerHTML = "";
-
-      data.resources.reverse().forEach(img => {
-        const image = document.createElement("img");
-        image.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${img.public_id}.jpg`;
-        album.appendChild(image);
-      });
-    }
-
-    // 🔄 Actualiza el álbum automáticamente cada 15 segundos
-    setInterval(() => {
-      if (document.getElementById("album").style.display === "grid") {
-        mostrarAlbum();
+      if (album.style.display === "grid") {
+        album.style.display = "none";
+      } else {
+        album.style.display = "grid";
       }
-    }, 15000);
+    }
   </script>
 
 </body>
