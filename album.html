@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Álbum de Fotos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #fff0f5;
+    text-align: center;
+    padding: 50px;
+  }
+  h1 {
+    color: #d63384;
+  }
+  .galeria {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+  }
+  .galeria img {
+    width: 250px;
+    border-radius: 10px;
+    transition: transform 0.3s;
+  }
+  .galeria img:hover {
+    transform: scale(1.05);
+  }
+  .btn {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 25px;
+    background: #d63384;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: background 0.3s;
+  }
+  .btn:hover {
+    background: #a01d5e;
+  }
+</style>
+</head>
+<body>
+
+<h1>Álbum de Fotos</h1>
+<p>Bienvenido al álbum de nuestra boda. 💖</p>
+
+<div class="galeria">
+  <img src="foto1.jpg" alt="Foto 1">
+  <img src="foto2.jpg" alt="Foto 2">
+  <img src="foto3.jpg" alt="Foto 3">
+  <img src="foto4.jpg" alt="Foto 4">
+</div>
+
+<a href="index.html" class="btn">Volver</a>
+
+</body>
+</html>
