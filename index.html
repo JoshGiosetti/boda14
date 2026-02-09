@@ -8,24 +8,26 @@
   <style>
     body {
       font-family: "Times New Roman", Times, serif;
-      background: #0B3C91;
-      text-align: center;
-      padding: 20px;
+      background: #0A1F44;
       margin: 0;
+      padding: 20px;
+      text-align: center;
     }
 
     .box {
       background: #FFFFFF;
-      padding: 25px;
-      border-radius: 14px;
-      max-width: 420px;
+      max-width: 430px;
       margin: 40px auto;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      border: 2px solid #C0C0C0;
     }
 
     h1 {
-      color: #0B3C91;
+      color: #0A1F44;
       margin-bottom: 10px;
+      letter-spacing: 1px;
     }
 
     p {
@@ -35,149 +37,140 @@
     }
 
     button {
-      margin-top: 15px;
-      padding: 14px;
       width: 100%;
-      background: #0B3C91;
-      border: none;
+      padding: 14px;
+      margin-top: 14px;
+      background: #0A1F44;
       color: #FFFFFF;
+      border: 2px solid #C0C0C0;
+      border-radius: 12px;
       font-size: 16px;
-      border-radius: 10px;
       cursor: pointer;
     }
 
     button:hover {
-      opacity: 0.9;
+      background: #132F63;
     }
 
     #mensaje {
       margin-top: 15px;
-      color: #0B3C91;
+      color: #0A1F44;
+      font-weight: bold;
+    }
+
+    input[type="file"] {
+      display: none;
     }
 
     #album {
-      margin-top: 20px;
+      margin-top: 25px;
       display: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
     }
 
     #album img {
       width: 100%;
       border-radius: 10px;
-      margin-bottom: 10px;
-    }
-
-    input[type="file"] {
-      display: none;
+      border: 2px solid #C0C0C0;
     }
   </style>
 </head>
 
 <body>
 
-<div class="box">
-  <h1>✨ RICORDI ETERNI ✨</h1>
-  <p>💍 X & D 💍</p>
-  <p><strong>Máximo 10 fotos por invitado</strong></p>
+  <div class="box">
+    <h1>✨ RICORDI ETERNI ✨</h1>
+    <p>💍 X & D 💍</p>
 
-  <!-- Cámara -->
-  <input type="file" id="cameraInput" accept="image/*" capture="environment" multiple>
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" multiple>
+    <input type="file" id="galleryInput" accept="image/*" multiple>
 
-  <!-- Galería -->
-  <input type="file" id="galleryInput" accept="image/*" multiple>
+    <button onclick="abrirCamara()">Captura el momento</button>
+    <button onclick="abrirGaleria()">Sube tu recuerdo</button>
+    <button onclick="subirFotos()">Guarda tu recuerdo</button>
+    <button onclick="mostrarAlbum()">Ver álbum</button>
 
-  <button onclick="abrirCamara()">Captura el momento</button>
-  <button onclick="abrirGaleria()">Sube tu recuerdo</button>
-  <button onclick="subirFotos()">Guarda tu recuerdo</button>
-  <button onclick="mostrarAlbum()">Ver álbum</button>
+    <p id="mensaje"></p>
+    <div id="album"></div>
+  </div>
 
-  <p id="mensaje"></p>
+  <script>
+    // 🔧 CONFIGURA TUS DATOS DE CLOUDINARY
+    const CLOUD_NAME = "TU_CLOUD_NAME";
+    const UPLOAD_PRESET = "TU_UPLOAD_PRESET";
 
-  <div id="album"></div>
-</div>
+    let fotosSeleccionadas = [];
 
-<script>
-  const MAX_FOTOS = 10;
-
-  // 🔧 CONFIGURA TUS DATOS DE CLOUDINARY
-  const CLOUD_NAME = "TU_CLOUD_NAME";
-  const UPLOAD_PRESET = "TU_UPLOAD_PRESET";
-
-  let fotosSeleccionadas = [];
-
-  function abrirCamara() {
-    document.getElementById("cameraInput").click();
-  }
-
-  function abrirGaleria() {
-    document.getElementById("galleryInput").click();
-  }
-
-  document.getElementById("cameraInput").addEventListener("change", manejarFotos);
-  document.getElementById("galleryInput").addEventListener("change", manejarFotos);
-
-  function manejarFotos(e) {
-    fotosSeleccionadas = Array.from(e.target.files);
-    document.getElementById("mensaje").innerText =
-      fotosSeleccionadas.length + " foto(s) seleccionada(s)";
-  }
-
-  async function subirFotos() {
-    if (fotosSeleccionadas.length === 0) {
-      document.getElementById("mensaje").innerText = "No seleccionaste fotos";
-      return;
+    function abrirCamara() {
+      document.getElementById("cameraInput").click();
     }
 
-    if (fotosSeleccionadas.length > MAX_FOTOS) {
+    function abrirGaleria() {
+      document.getElementById("galleryInput").click();
+    }
+
+    document.getElementById("cameraInput").addEventListener("change", manejarFotos);
+    document.getElementById("galleryInput").addEventListener("change", manejarFotos);
+
+    function manejarFotos(e) {
+      fotosSeleccionadas = Array.from(e.target.files);
       document.getElementById("mensaje").innerText =
-        "Máximo " + MAX_FOTOS + " fotos permitidas";
-      return;
+        fotosSeleccionadas.length + " foto(s) seleccionada(s)";
     }
 
-    document.getElementById("mensaje").innerText = "Subiendo fotos...";
+    async function subirFotos() {
+      if (fotosSeleccionadas.length === 0) {
+        document.getElementById("mensaje").innerText = "No seleccionaste fotos";
+        return;
+      }
 
-    for (let foto of fotosSeleccionadas) {
-      const formData = new FormData();
-      formData.append("file", foto);
-      formData.append("upload_preset", UPLOAD_PRESET);
+      document.getElementById("mensaje").innerText = "Subiendo recuerdos...";
 
-      await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-        method: "POST",
-        body: formData
+      for (let foto of fotosSeleccionadas) {
+        const formData = new FormData();
+        formData.append("file", foto);
+        formData.append("upload_preset", UPLOAD_PRESET);
+
+        await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+          method: "POST",
+          body: formData
+        });
+      }
+
+      document.getElementById("mensaje").innerText =
+        "✨ Tu recuerdo fue guardado ✨";
+
+      fotosSeleccionadas = [];
+    }
+
+    async function mostrarAlbum() {
+      const album = document.getElementById("album");
+      album.style.display = "grid";
+      album.innerHTML = "Cargando álbum...";
+
+      const res = await fetch(
+        `https://res.cloudinary.com/${CLOUD_NAME}/image/list/boda.json`
+      );
+
+      const data = await res.json();
+      album.innerHTML = "";
+
+      data.resources.reverse().forEach(img => {
+        const image = document.createElement("img");
+        image.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${img.public_id}.jpg`;
+        album.appendChild(image);
       });
     }
 
-    document.getElementById("mensaje").innerText =
-      "✨ Tu recuerdo fue guardado ✨";
-
-    fotosSeleccionadas = [];
-  }
-
-  async function mostrarAlbum() {
-    const album = document.getElementById("album");
-    album.style.display = "block";
-    album.innerHTML = "Cargando álbum...";
-
-    const res = await fetch(
-      `https://res.cloudinary.com/${CLOUD_NAME}/image/list/boda.json`
-    );
-
-    const data = await res.json();
-    album.innerHTML = "";
-
-    data.resources.reverse().forEach(img => {
-      const image = document.createElement("img");
-      image.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${img.public_id}.jpg`;
-      album.appendChild(image);
-    });
-  }
-
-  // Actualización automática del álbum cada 15 segundos
-  setInterval(() => {
-    if (document.getElementById("album").style.display === "block") {
-      mostrarAlbum();
-    }
-  }, 15000);
-</script>
+    // 🔄 Actualiza el álbum automáticamente cada 15 segundos
+    setInterval(() => {
+      if (document.getElementById("album").style.display === "grid") {
+        mostrarAlbum();
+      }
+    }, 15000);
+  </script>
 
 </body>
 </html>
